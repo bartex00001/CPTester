@@ -110,7 +110,7 @@ class Test:
 
     
     def print_wa(self) -> None:
-        print(Colors.add_color("❌ ❌ Test " + self.test_name + " failed", Colors.RED))
+        print(Colors.add_color("❌ ❌ Test " + self.test_name + " failed - wrong answer", Colors.RED))
         print(Colors.add_color("❌ ❌ The input file was: " + self.input_file_path, Colors.RED))
         print("Input file contents: ")
         Test.print_file(self.input_file_path)
