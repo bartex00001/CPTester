@@ -1,3 +1,4 @@
+from genericpath import isfile
 import time
 from os import system
 from os import remove
@@ -160,6 +161,7 @@ class Test:
                 correct_line += Colors.add_color(line_expected[i], Colors.M_GREEN)
                 incorrect_line += Colors.add_color(line_actual[i], Colors.M_RED)
 
+        print("-"*50)
         print(correct_line)
         print(incorrect_line)
 
@@ -213,13 +215,14 @@ class Tester:
         print("Source compiled to " + EXECUTABLE_PATH)
 
 
-    def add_all_tests(self) -> None:
+    def add_all_tests(self) -> int:
         for element in listdir(INPUT_FILES_FOLDER):
             file_with_path = INPUT_FILES_FOLDER + element
             if path.isfile(file_with_path):
                 self.add_test(element)
 
         print("Tests found: " + str(len(self.tests)))
+        return len(self.tests)
 
 
     def add_test(self, input_file_name: str) -> None:
@@ -227,14 +230,29 @@ class Tester:
             self.tests.append(Test(input_file_name))
 
 
-    def run_all_tests(self) -> None:
+    def run_all_tests(self) -> int:
+        correct_tests = 0
+
         for test in self.tests:
             result = test.run_test()
+            correct_tests += result
             if not result and STOP_ON_FAIL:
                 break
 
+        return correct_tests
+        
 
 if __name__ == "__main__":
     tester = Tester()
-    tester.add_all_tests()
-    tester.run_all_tests()
+    test_num = tester.add_all_tests()
+    success_tests = tester.run_all_tests()
+
+    # Remove the temporary files
+    if path.isfile(OUTPUT_FILES_FOLDER + Test.TEMP_OUT_FILE_NAME):
+        remove(OUTPUT_FILES_FOLDER + Test.TEMP_OUT_FILE_NAME)
+
+    if success_tests != 0:
+        if test_num == success_tests:
+            print(Colors.add_color("\n✅ All tests passed ✅", Colors.GREEN))
+        else:
+            print(Colors.add_color("\n❌ Percentage of tests passed: " + str(round(success_tests*100 / test_num, 2)) + "% ❌", Colors.RED))
