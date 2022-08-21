@@ -133,6 +133,11 @@ class Test:
         for i in range(lines_to_show):
             Test.print_line_diff(expected[i], actual[i], i+1)
 
+        if len(expected) > len(actual):
+            print("\n" + Colors.add_color("❌ ❌ The output has more lines than the expected output", Colors.RED))
+        if len(expected) < len(actual):
+            print("\n" + Colors.add_color("❌ ❌ The output has less lines than the expected output", Colors.RED))
+
     
     def print_line_diff(line_expected: str, line_actual: str, line_nr: int) -> None:    
         correct_line = str(line_nr) + "\t| "
@@ -143,6 +148,7 @@ class Test:
 
         if line_expected == line_actual:
             print(correct_line + line_expected)
+            return
 
         (line_expected, line_actual) = Test.fill_minning_length(line_expected, line_actual)
 
@@ -173,7 +179,7 @@ class Test:
         with open(file_path, "r") as file:
             contents = file.readlines()
             for i in range(min(len(contents), TRIM)):
-                print(str(i+1) + "\t| " + contents[i])
+                print(str(i+1) + "\t| " + contents[i].strip())
 
             if len(contents) > TRIM:
                 print("...")
