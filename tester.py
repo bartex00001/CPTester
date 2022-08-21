@@ -3,14 +3,18 @@ import os
 from pathlib import Path
 
 
-INPUT_FILES_PATH = "./tests/in/"
-OUTPUT_FILES_PATH = "./tests/out/"
+INPUT_FILES_FOLDER = "./tests/in/"
+OUTPUT_FILES_FOLDER = "./tests/out/"
 TEST_PREFIX = "sol"
 
 IN_TEST_SUFIX = ".in"
 OUT_TEST_SUFIX = ".out"
 
 EXECUTABLE_PATH = "./sol.exe"
+# Leave empty if you want to compile the executable manually
+SOURCE_PATH = "./sol.cpp"
+COMPILE_COMMAND = "g++ -std=c++17 -O2 -o"
+ALWAYS_COMPILE = True
 
 STOP_ON_FAIL = True
 
@@ -35,12 +39,13 @@ class Test:
 
     [staticmethod]
     def is_valid_output(output_file_name: str) -> bool:
-        output_file = Path(OUTPUT_FILES_PATH + output_file_name)
-        return os.path.isfile(output_file)
+        output_file_path = OUTPUT_FILES_FOLDER + output_file_name
+        return os.path.isfile(output_file_path)
             
 
     def __init__(self, input_file_name) -> None:
         pass
+
 
     def run_test(self) -> bool:
         pass
@@ -48,19 +53,52 @@ class Test:
 
 class Tester:
     def __init__(self) -> None:
-        pass
+        self.tests = []
+        self.executable_path = self.get_executable_path() # return path or create one.
+
+
+    def get_executable_path(self) -> str:
+        if EXECUTABLE_PATH == "":
+            raise Exception("No executable path specified")
+
+        if ALWAYS_COMPILE:
+            self.compile_executable()
+
+        if os.path.isfile(EXECUTABLE_PATH):
+            return EXECUTABLE_PATH
+
+        self.compile_executable()
+        return EXECUTABLE_PATH
+
+    
+    def compile_executable(self) -> None:
+        if SOURCE_PATH == "":
+            raise Exception("No source code path specified - it is required to compile the executable.\n\
+                            If you do not want to compile the executable, check your files and path variables.")
+
+        if os.path.isfile(EXECUTABLE_PATH):
+            os.remove(EXECUTABLE_PATH)
+
+        os.system(COMPILE_COMMAND + " " + EXECUTABLE_PATH + " " + SOURCE_PATH)
+        print("Source compiled to " + EXECUTABLE_PATH)
+
 
     def add_all_tests(self) -> None:
-        # listdir() to get all elements in a directory
-        # to check if element is a file isfile(path_to_file)
-        pass
-    
+        for element in os.listdir(INPUT_FILES_FOLDER):
+            file_with_path = INPUT_FILES_FOLDER + element
+            if os.path.isfile(file_with_path):
+                self.add_test(element)
+
+
     def add_test(self, input_file_name: str) -> None:
-        pass
+        if Test.is_valid_test(input_file_name):
+            self.tests.append(Test(input_file_name))
+            print("Added test: " + input_file_name)
+
 
     def run_all_tests(self) -> None:
         pass
 
 
 if __name__ == "__main__":
-    print(Test.is_valid_test("sol001.out"))
+    tester = Tester()
