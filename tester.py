@@ -1,3 +1,4 @@
+from enum import Flag
 import time
 import os
 from pathlib import Path
@@ -12,9 +13,9 @@ OUT_TEST_SUFIX = ".out"
 
 EXECUTABLE_PATH = "./sol.exe"
 # Leave empty if you want to compile the executable manually
-SOURCE_PATH = "./sol.cpp"
+SOURCE_PATH = "sol.cpp"
 COMPILE_COMMAND = "g++ -std=c++17 -O2 -o"
-ALWAYS_COMPILE = True
+ALWAYS_COMPILE = False
 
 STOP_ON_FAIL = True
 
@@ -54,27 +55,22 @@ class Test:
 class Tester:
     def __init__(self) -> None:
         self.tests = []
-        self.executable_path = self.get_executable_path() # return path or create one.
+        self.check_executable() # return path or create one.
 
 
-    def get_executable_path(self) -> str:
+    def check_executable(self) -> None:
         if EXECUTABLE_PATH == "":
             raise Exception("No executable path specified")
 
-        if ALWAYS_COMPILE:
+        should_compile = ALWAYS_COMPILE or not os.path.isfile(EXECUTABLE_PATH)
+
+        if should_compile:
             self.compile_executable()
-
-        if os.path.isfile(EXECUTABLE_PATH):
-            return EXECUTABLE_PATH
-
-        self.compile_executable()
-        return EXECUTABLE_PATH
-
+        
     
     def compile_executable(self) -> None:
         if SOURCE_PATH == "":
-            raise Exception("No source code path specified - it is required to compile the executable.\n\
-                            If you do not want to compile the executable, check your files and path variables.")
+            raise Exception("No source code path specified - it is required to compile the executable.\nIf you do not want to compile the executable, check your settings.")
 
         if os.path.isfile(EXECUTABLE_PATH):
             os.remove(EXECUTABLE_PATH)
