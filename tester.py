@@ -217,7 +217,7 @@ class Tester:
             remove(EXECUTABLE_PATH)
 
         system(COMPILE_COMMAND + " " + EXECUTABLE_PATH + " " + SOURCE_PATH)
-        print("Source compiled to " + EXECUTABLE_PATH)
+        print("Source code compiled to " + EXECUTABLE_PATH)
 
 
     def add_all_tests(self) -> None:
