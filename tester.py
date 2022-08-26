@@ -253,14 +253,22 @@ class Tester:
         
 
     def print_summary(self) -> None:
+        print() #spacer
+
         if self.number_of_tests == 0:
             print(TextFormatter.add_color("❌ ❌ No tests found -> no tests performed", TextFormatter.RED))
         else:
             if self.number_of_tests == self.number_of_passed_tests:
-                print(TextFormatter.add_color("\n✅ All tests passed ✅", TextFormatter.GREEN))
+                print(TextFormatter.add_color("✅ All tests passed ✅", TextFormatter.GREEN))
             else:
-                pass_percentage = round(self.number_of_passed_tests*100 / self.number_of_tests, 2)
-                print(TextFormatter.add_color("\n❌ Percentage of tests passed: " + str(pass_percentage) + "% ❌", TextFormatter.RED))
+                self.print_fail_message()
+
+    def print_fail_message(self) -> None:
+        pass_percentage = round(self.number_of_passed_tests*100 / self.number_of_tests, 2)
+        if STOP_ON_FAIL:
+            print(TextFormatter.add_color("❌ Stopped on fail ❌", TextFormatter.RED))
+
+        print(TextFormatter.add_color("❌ Percentage of tests passed: " + str(pass_percentage) + "% ❌", TextFormatter.RED))
 
 
 if __name__ == "__main__":
