@@ -9,8 +9,8 @@ from os import path
 TIME_LIMIT_S = 1
 INPUT_FILES_FOLDER = "tests/in/"
 OUTPUT_FILES_FOLDER = "tests/out/"
-TEST_PREFIX = "sol"
 
+TEST_PREFIX = "sol"
 IN_TEST_SUFIX = ".in"
 OUT_TEST_SUFIX = ".out"
 
@@ -22,7 +22,7 @@ ALWAYS_COMPILE = False
 
 STOP_ON_FAIL = True
 SHOW_FILE_DIFF = True
-TRIM = 15
+TRIM_LINES = 15
 
 
 # Custom checker can be defined here.
@@ -31,7 +31,7 @@ def answer_checker(input_file: str, program_output_file: str) -> bool:
     return False
 
 
-class Colors:
+class TextFormatter:
     RED = "1;31;40"
     M_RED = "0;30;41"
     GREEN = "1;32;40"
@@ -41,8 +41,11 @@ class Colors:
     def add_color(text: str, color_code: str) -> str:
         return "\x1b[" + color_code + "m" + text + "\x1b[0m"
 
+
 class Test:
     TEMP_OUT_FILE_NAME = "temp.out"
+    PYTHON_TIME = 0.05
+    TAB_SIZE = 8
 
     [staticmethod]
     def is_valid_test(input_file_name: str) -> bool:
@@ -81,19 +84,20 @@ class Test:
         system(self.command)
         end_time = time.time()
 
-        time_elapsed = max(round(end_time - start_time, 3)-0.05, 0)
+        time_elapsed = max(round(end_time - start_time-Test.PYTHON_TIME, 3), 0)
         if time_elapsed > TIME_LIMIT_S:
             self.tle_message(time_elapsed)
             return False
 
-        if not self.check_output() and not answer_checker(self.input_file_path, self.test_output_path):
+        is_wa = not self.check_output() and not answer_checker(self.input_file_path, self.test_output_path)
+        if is_wa:
             self.print_wa()
             if SHOW_FILE_DIFF:
                 self.print_diff()
             
             return False
 
-        print(Colors.add_color("✅ Test " + self.test_name + " passed in " + str(time_elapsed) + " s", Colors.GREEN))
+        print(TextFormatter.add_color("✅ Test " + self.test_name + " passed in " + str(time_elapsed) + " s", TextFormatter.GREEN))
         return True
 
     
@@ -111,15 +115,15 @@ class Test:
 
     
     def print_wa(self) -> None:
-        print(Colors.add_color("❌ ❌ Test " + self.test_name + " failed - wrong answer", Colors.RED))
-        print(Colors.add_color("❌ ❌ The input file was: " + self.input_file_path, Colors.RED))
+        print(TextFormatter.add_color("❌ ❌ Test " + self.test_name + " failed - wrong answer", TextFormatter.RED))
+        print(TextFormatter.add_color("❌ ❌ The input file was: " + self.input_file_path, TextFormatter.RED))
         print("Input file contents: ")
         Test.print_file(self.input_file_path)
         
 
     def tle_message(self, time_elapsed: float) -> None:
-        print(Colors.add_color("❌ 🕘 Test " + self.test_name + " timed out in " + str(time_elapsed) + " s", Colors.RED))
-        print(Colors.add_color("❌ 🕘 The input file was: " + self.input_file_path, Colors.RED))
+        print(TextFormatter.add_color("❌ 🕘 Test " + self.test_name + " timed out in " + str(time_elapsed) + " s", TextFormatter.RED))
+        print(TextFormatter.add_color("❌ 🕘 The input file was: " + self.input_file_path, TextFormatter.RED))
 
 
     def print_diff(self) -> None:
@@ -130,19 +134,19 @@ class Test:
             actual = file.readlines()
 
         print("\nDifferences in output:")
-        lines_to_show = min(min(len(expected), len(actual)), TRIM)
+        lines_to_show = min(min(len(expected), len(actual)), TRIM_LINES)
         for i in range(lines_to_show):
             Test.print_line_diff(expected[i], actual[i], i+1)
 
         if len(expected) > len(actual):
-            print("\n" + Colors.add_color("❌ ❌ The output has more lines than the expected output", Colors.RED))
+            print("\n" + TextFormatter.add_color("❌ ❌ The output has more lines than the expected output", TextFormatter.RED))
         if len(expected) < len(actual):
-            print("\n" + Colors.add_color("❌ ❌ The output has less lines than the expected output", Colors.RED))
+            print("\n" + TextFormatter.add_color("❌ ❌ The output has less lines than the expected output", TextFormatter.RED))
 
     
     def print_line_diff(line_expected: str, line_actual: str, line_nr: int) -> None:    
         correct_line = str(line_nr) + "\t| "
-        incorrect_line = "\t| "
+        incorrect_line =  Test.TAB_SIZE * "." + "| "
 
         line_expected = line_expected.strip()
         line_actual = line_actual.strip()
@@ -155,11 +159,11 @@ class Test:
 
         for i in range(len(line_actual)):
             if line_expected[i] == line_actual[i]:
-                correct_line += Colors.add_color(line_expected[i], Colors.GREEN)
-                incorrect_line += Colors.add_color(line_actual[i], Colors.RED)
+                correct_line += TextFormatter.add_color(line_expected[i], TextFormatter.GREEN)
+                incorrect_line += TextFormatter.add_color(line_actual[i], TextFormatter.RED)
             else:
-                correct_line += Colors.add_color(line_expected[i], Colors.M_GREEN)
-                incorrect_line += Colors.add_color(line_actual[i], Colors.M_RED)
+                correct_line += TextFormatter.add_color(line_expected[i], TextFormatter.M_GREEN)
+                incorrect_line += TextFormatter.add_color(line_actual[i], TextFormatter.M_RED)
 
         print("-"*50)
         print(correct_line)
@@ -180,10 +184,10 @@ class Test:
     def print_file(file_path: str) -> None:
         with open(file_path, "r") as file:
             contents = file.readlines()
-            for i in range(min(len(contents), TRIM)):
+            for i in range(min(len(contents), TRIM_LINES)):
                 print(str(i+1) + "\t| " + contents[i].strip())
 
-            if len(contents) > TRIM:
+            if len(contents) > TRIM_LINES:
                 print("...")
                 print("Rest of the file can be found in " + file_path + "\n")
 
@@ -253,6 +257,6 @@ if __name__ == "__main__":
 
     if success_tests != 0:
         if test_num == success_tests:
-            print(Colors.add_color("\n✅ All tests passed ✅", Colors.GREEN))
+            print(TextFormatter.add_color("\n✅ All tests passed ✅", TextFormatter.GREEN))
         else:
-            print(Colors.add_color("\n❌ Percentage of tests passed: " + str(round(success_tests*100 / test_num, 2)) + "% ❌", Colors.RED))
+            print(TextFormatter.add_color("\n❌ Percentage of tests passed: " + str(round(success_tests*100 / test_num, 2)) + "% ❌", TextFormatter.RED))
