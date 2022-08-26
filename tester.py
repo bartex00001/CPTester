@@ -220,7 +220,7 @@ class Tester:
             system(COMPILE_COMMAND + " " + EXECUTABLE_PATH + " " + SOURCE_PATH)
         else:
             system(COMPILE_COMMAND + " " + SOURCE_PATH + " -o " + EXECUTABLE_PATH)
-            
+
         print("Source code compiled to " + EXECUTABLE_PATH)
 
 
