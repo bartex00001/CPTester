@@ -16,7 +16,7 @@ OUT_TEST_SUFIX = ".out"
 EXECUTABLE_PATH = "sol.exe"
 # Leave empty if you want to compile the executable manually
 SOURCE_PATH = "sol.cpp"
-COMPILE_COMMAND = "g++ -std=c++17 -O2 -o"
+COMPILE_COMMAND = "g++ -std=c++17 -O2"
 ALWAYS_COMPILE = False
 
 STOP_ON_FAIL = True
@@ -216,7 +216,11 @@ class Tester:
         if path.isfile(EXECUTABLE_PATH):
             remove(EXECUTABLE_PATH)
 
-        system(COMPILE_COMMAND + " " + EXECUTABLE_PATH + " " + SOURCE_PATH)
+        if "-o" in COMPILE_COMMAND:
+            system(COMPILE_COMMAND + " " + EXECUTABLE_PATH + " " + SOURCE_PATH)
+        else:
+            system(COMPILE_COMMAND + " " + SOURCE_PATH + " -o " + EXECUTABLE_PATH)
+            
         print("Source code compiled to " + EXECUTABLE_PATH)
 
 
