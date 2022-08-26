@@ -1,4 +1,3 @@
-from genericpath import isfile
 import time
 from os import system
 from os import remove
@@ -196,6 +195,8 @@ class Tester:
     def __init__(self) -> None:
         self.tests = []
         self.check_executable() # return path or create one.
+        self.number_of_tests = 0
+        self.number_of_passed_tests = 0
 
 
     def check_executable(self) -> None:
@@ -219,14 +220,14 @@ class Tester:
         print("Source compiled to " + EXECUTABLE_PATH)
 
 
-    def add_all_tests(self) -> int:
+    def add_all_tests(self) -> None:
         for element in listdir(INPUT_FILES_FOLDER):
             file_with_path = INPUT_FILES_FOLDER + element
             if path.isfile(file_with_path):
                 self.add_test(element)
 
         print("Tests found: " + str(len(self.tests)))
-        return len(self.tests)
+        self.number_of_tests = len(self.tests)
 
 
     def add_test(self, input_file_name: str) -> None:
@@ -234,7 +235,7 @@ class Tester:
             self.tests.append(Test(input_file_name))
 
 
-    def run_all_tests(self) -> int:
+    def run_all_tests(self) -> None:
         correct_tests = 0
 
         for test in self.tests:
@@ -243,20 +244,29 @@ class Tester:
             if not result and STOP_ON_FAIL:
                 break
 
-        return correct_tests
+        self.number_of_passed_tests = correct_tests
+
+
+    def clear_temporary_files(self) -> None:
+        if path.isfile(OUTPUT_FILES_FOLDER + Test.TEMP_OUT_FILE_NAME):
+            remove(OUTPUT_FILES_FOLDER + Test.TEMP_OUT_FILE_NAME)
         
+
+    def print_summary(self) -> None:
+        if self.number_of_tests == 0:
+            print(TextFormatter.add_color("❌ ❌ No tests found -> no tests performed", TextFormatter.RED))
+        else:
+            if self.number_of_tests == self.number_of_passed_tests:
+                print(TextFormatter.add_color("\n✅ All tests passed ✅", TextFormatter.GREEN))
+            else:
+                pass_percentage = round(self.number_of_passed_tests*100 / self.number_of_tests, 2)
+                print(TextFormatter.add_color("\n❌ Percentage of tests passed: " + str(pass_percentage) + "% ❌", TextFormatter.RED))
+
 
 if __name__ == "__main__":
     tester = Tester()
-    test_num = tester.add_all_tests()
-    success_tests = tester.run_all_tests()
+    tester.add_all_tests()
+    tester.run_all_tests()
 
-    # Remove the temporary files
-    if path.isfile(OUTPUT_FILES_FOLDER + Test.TEMP_OUT_FILE_NAME):
-        remove(OUTPUT_FILES_FOLDER + Test.TEMP_OUT_FILE_NAME)
-
-    if success_tests != 0:
-        if test_num == success_tests:
-            print(TextFormatter.add_color("\n✅ All tests passed ✅", TextFormatter.GREEN))
-        else:
-            print(TextFormatter.add_color("\n❌ Percentage of tests passed: " + str(round(success_tests*100 / test_num, 2)) + "% ❌", TextFormatter.RED))
+    tester.print_summary()
+    tester.clear_temporary_files()
